@@ -1,0 +1,49 @@
+---
+title: "Untitled"
+author: "us"
+date: "11 11 2022"
+output: pdf_document
+---
+
+```{r}
+X_train <- read.csv('data/train_ratings_all.dat', sep='\t', header=F)
+X_test <- read.csv("./data/test_ratings_all.dat", header = F, sep = "\t")
+Dates_train <- read.csv("./data/train_dates_all.dat", header = F, sep = "\t")
+Dates_test <- read.csv("./data/test_dates_all.dat", header = F, sep = "\t")
+Y_train <- read.csv("./data/train_y_rating.dat", header = F, sep = "\t")
+Y_Date_train <- read.csv("./data/train_y_date.dat", header = F, sep = "\t")
+Y_Date_test <- read.csv("./data/test_y_date.dat", header = F, sep = "\t")
+movie_titles_dates <- read.csv("./data/movie_titles.txt", header = F)
+
+replace_na_with_mean <- function(X){
+  X[X == 0] <- NA
+  library(imputeTS)
+  X <- t(na_mean(t(X)))
+  X
+}
+X_train <-replace_na_with_mean(X_train)
+X_test <- replace_na_with_mean(X_test)
+```
+
+## Data processing
+```{r}
+colnames(X_train) <- movie_titles_dates$V2
+
+```
+
+
+```{r}
+years_since_release <- max(movie_titles_dates$V1) - movie_titles_dates$V1
+model <- lm(unlist(Y_train) ~ X_train)
+
+train_ratings <- X_train[1:8000,]
+test_ratings <- X_train[8001:10000,]
+train_labels <- Y_train[1:8000,]
+test_labels <- Y_train[8001:10000,]
+
+model <- lm(train_labels ~ train_ratings)
+pred <- predict(model, as.data.frame(test_ratings))
+
+
+```
+
