@@ -60,6 +60,6 @@ Build Linear model on all training data & predict
 lin_model <- lm(y~., data = data.frame(X = Train_Features, y = Train_Labels))
 sqrt(mean((Train_Labels$y - pmax(pmin(predict(lin_model), 5), 1))^2)) # In sample RMSE
 Predicted_Test_Lables <- pmax(pmin(predict(lin_model, newdata = data.frame(X = Test_Features)), 5), 1)
-write.csv(Predicted_Test_Lables, file = "First_Try.csv")
+write.csv(Predicted_Test_Lables, file = "./attempts/First_Try.csv")
 ```
 
