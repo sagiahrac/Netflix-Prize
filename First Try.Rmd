@@ -25,14 +25,16 @@ Test_Dates_Labels <- read.table("./data/test_y_date.dat", header = F, sep = "\t"
 movie_info <- read.table("./data/movie_titles.txt", header = F, sep = ',')
 ```
 
-Preprocess Data
+Name the Data
 ```{r}
-colnames(movie_info) <- c("Release Years", "Names")
+colnames(movie_info) <- c("Release Years", "Names", "Genres")
 colnames(Train_Features) <- movie_info$Names
-colnames(Test_Features) <- movie_info$Names
+colnames(Test_Features) <- colnames(Train_Features)
 colnames(Train_Labels) <- c('y')
+```
 
-
+Replace zeros by average rating of each user
+```{r}
 for (i in 1:10000){
   non_zero_avg = mean(unlist(Train_Features[i, ])[as.vector(Train_Features[i, ] != 0)])
   Train_Features[i, ] = ifelse(Train_Features[i, ] == 0, non_zero_avg, Train_Features[i, ])
@@ -51,5 +53,13 @@ CV <- data.frame(X = Train_Features[8001:10000, ], y = Train_Labels[8001:10000, 
 lin_model <- lm(y~., data = Train)
 sqrt(mean((Train$y - pmax(pmin(predict(lin_model), 5), 1))^2)) # In sample RMSE
 sqrt(mean((CV$y - pmax(pmin(predict(lin_model, newdata = CV), 5), 1))^2))
+```
+
+Build Linear model on all training data & predict
+```{r}
+lin_model <- lm(y~., data = data.frame(X = Train_Features, y = Train_Labels))
+sqrt(mean((Train_Labels$y - pmax(pmin(predict(lin_model), 5), 1))^2)) # In sample RMSE
+Predicted_Test_Lables <- pmax(pmin(predict(lin_model, newdata = data.frame(X = Test_Features)), 5), 1)
+write.csv(Predicted_Test_Lables, file = "First_Try.csv")
 ```
 
