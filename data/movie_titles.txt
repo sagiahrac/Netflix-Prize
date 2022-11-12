@@ -16,7 +16,7 @@
 2001,Oceans Eleven,Action
 2002,The Bourne Identity,Action
 2003,The Italian Job,Action
-2004,I Robot,Science Fiction
+2004,I Robot,Action
 1999,American Beauty,Drama
 2003,How to Lose a Guy in 10 Days,RomCom
 1998,Lethal Weapon 4,Action
@@ -72,7 +72,7 @@
 1991,The Silence of the Lambs,Thriller
 2000,Memento,Thriller
 2001,Tomb Raider,Adventure
-1986,Ferris Buellers Day Off,Commedy
+1986,Ferris Buellers Day Off,Comedy
 2002,Maid in Manhattan,RomCom
 1999,Entrapment,Thriller
 2000,Meet the Parents,Comedy
