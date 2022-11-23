@@ -33,15 +33,20 @@ colnames(Test_Features) <- colnames(Train_Features)
 colnames(Train_Labels) <- c('y')
 ```
 
-Replace zeros by average rating of each user in the genre
+Train processing - Replace zeros by average rating of each user in the genre
 ```{r}
-avg_per_genre <- data.frame(rep(0, 10000))
+non_zero_avg = rep(0, 10000)
+for (i in 1:10000) {
+  non_zero_avg[i] = mean(unlist(Train_Features[i, ])[as.vector(Train_Features[i, ] != 0)])
+}
+  
+avg_per_genre <- data.frame(matrix(nrow = 10000, ncol = 7))
+colnames(avg_per_genre) = unique(movie_info$Genres)
 for (genre in unique(movie_info$Genres)){
   avg_per_genre[genre] <- rowSums(Train_Features[, movie_info$Genres == genre]) / 
     rowSums(!!Train_Features[, movie_info$Genres == genre])
 }
 for (i in 1:10000) {
-  non_zero_avg = mean(unlist(Train_Features[i, ])[as.vector(Train_Features[i, ] != 0)])
   for (j in 1:99) {
     if (Train_Features[i, j] == 0) {
       Train_Features[i,j] = avg_per_genre[i, movie_info$Genres[j]]
@@ -51,26 +56,32 @@ for (i in 1:10000) {
     }
   }
 }
-#for (i in 1:2931){
-#  non_zero_avg = mean(unlist(Test_Features[i, ])[as.vector(Test_Features[i, ] != 0)])
-#  Test_Features[i, ] = ifelse(Test_Features[i, ] == 0, non_zero_avg, Test_Features[i, ])
-#}
 ```
 
-Build & Test Linear Model
+
+Test processing - Replace zeros by average rating of each user in the genre (to be used for prediction)
 ```{r}
-Train <- data.frame(X = Train_Features[1:8000, ], y = Train_Labels[1:8000, ])
-CV <- data.frame(X = Train_Features[8001:10000, ], y = Train_Labels[8001:10000, ])
-lin_model <- lm(y~., data = Train)
-sqrt(mean((Train$y - pmax(pmin(predict(lin_model), 5), 1))^2)) # In sample RMSE
-sqrt(mean((CV$y - pmax(pmin(predict(lin_model, newdata = CV), 5), 1))^2))
+non_zero_avg = rep(0, 2931)
+for (i in 1:2931) {
+  non_zero_avg[i] = mean(unlist(Test_Features[i, ])[as.vector(Test_Features[i, ] != 0)])
+}
+  
+avg_per_genre <- data.frame(matrix(nrow = 2931, ncol = 7))
+colnames(avg_per_genre) = unique(movie_info$Genres)
+for (genre in unique(movie_info$Genres)){
+  avg_per_genre[genre] <- rowSums(Test_Features[, movie_info$Genres == genre]) / 
+    rowSums(!!Test_Features[, movie_info$Genres == genre])
+}
+for (i in 1:2931) {
+  for (j in 1:99) {
+    if (Test_Features[i, j] == 0) {
+      Test_Features[i,j] = avg_per_genre[i, movie_info$Genres[j]]
+      if (is.na(Test_Features[i, j])){
+        Test_Features[i,j] = non_zero_avg[i]
+      }
+    }
+  }
+}
 ```
 
-Build Linear model on all training data & predict
-```{r}
-lin_model <- lm(y~., data = data.frame(X = Train_Features, y = Train_Labels))
-sqrt(mean((Train_Labels$y - pmax(pmin(predict(lin_model), 5), 1))^2)) # In sample RMSE
-#Predicted_Test_Lables <- pmax(pmin(predict(lin_model, newdata = data.frame(X = Test_Features)), 5), 1)
-#write.csv(Predicted_Test_Lables, file = "./attempts/First_Try.csv")
-```
 
